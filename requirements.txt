@@ -1,0 +1,3 @@
+mediawikiapi
+osmnx
+matplotlib

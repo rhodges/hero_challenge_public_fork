@@ -1,0 +1,60 @@
+// Your feature represented in GeoJSON format -- it is in WGS 84 "EPSG:4326" projection; 
+//      The numbers used in this coordinate system should feel familiar to you, even if you don't have a GIS background:
+//      N. Pole & 90 degrees North latitude, The international dateline (roughly) following (+/-)180 degrees longitude, etc...
+//      Generate this value in the 'Build your map' section of the notebook.
+const geojsonObject = {{ GEOJSON }};
+
+// You will help configure the OpenLayers style in the 'Build your map' section of the notebook.
+//      This is written to conform to OpenLayers' syntax
+//      See more here: https://openlayers.org/en/latest/apidoc/module-ol_style_Style-Style.html
+{{ MAPSTYLE }}
+
+// GeoJSON is a vector data type (as opposed to raster or vector tile). This means the map will need to have 
+//      a vector layer to render it to. Before we can render the GeoJSON to a Vector layer, we first have
+//      to interpret is as one of more vector features (shapes) and add it to a vector data 'source'.
+const vectorSource = new ol.source.Vector({
+    features: new ol.format.GeoJSON().readFeatures(geojsonObject, {
+        // The standard projection for GeoJSON is EPSG:4326, and indeed that's what we used to define our shape(s).
+        dataProjection: 'EPSG:4326',
+        // The most common projection for maps on the web is 'Web Mercator' or 'ESPG:3857'. 
+        // Web mercator isn't a spatially accurate representation, but it looks less distorted than EPSG:4326.
+        featureProjection: 'EPSG:3857'
+    })
+});
+
+//  Openlayers' Vector layers expect styling not as an object like we've prepared, but as a function, where the 
+//      feature's type is provided to the object as the key to get the style. Here's that function:
+const styleFunction = function (feature) {
+  return styles[feature.getGeometry().getType()];
+};
+
+// Now we can add the vector source, along with a style that you built to define how to render it to a layer.
+const vectorLayer = new ol.layer.Vector({
+    source: vectorSource,
+    style: styleFunction,
+});
+
+// Finally, we add that layer and a base map to a Map object.
+const map = new ol.Map({
+    layers: [
+        new ol.layer.Tile({
+            // For our basemap, we will use OpenStreetMaps(OSM) - just like where we pulled our GeoData from.
+            //      Due to this, your feature should perfectly match its representation on the map.
+            source: new ol.source.OSM
+        }),
+        vectorLayer,
+    ],
+    // This will be rendered to the element on your HTML page with the id 'map'.
+    target: 'map',
+    'view': new ol.View({
+        // Start focused on the center of the world map.
+        center: [0, 0],
+        // Zoom 2 is zoomed WAY out. Depending on your map element's size, this could be big enough to see the whole world.
+        zoom: 2,
+        // Let's view the map in web mercator
+        projection: 'EPSG:3857'
+    })
+});
+
+// Finally, when we're all done: zoom the map in on your feature so we can see it clearly.
+map.getView().fit(vectorSource.getExtent(), map.getSize());
