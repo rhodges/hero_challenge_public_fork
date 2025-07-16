@@ -20,7 +20,7 @@ overt bigots, sexual predators, mass-murderers, and NSFW content.
 
 ## Steps:
 1. Clone this repository
-   * `git clone https://github.com/Ecotrust/hero_challenge.git`
+   * `git clone https://github.com/Ecotrust/hero_challenge_public.git`
 2. Create your conda/python environment
    * `cd hero_challenge`
    * `conda env create -f environment.yml`
